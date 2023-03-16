@@ -28,6 +28,6 @@ app.get('/maintenance', (req, res) => {
 
 
 
-app.listen(3333, () => {
-    console.log("listening on http://localhost:3333")
+app.listen(3000, () => {
+    console.log("listening on http://localhost:3000")
 })
