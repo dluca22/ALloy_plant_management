@@ -3,6 +3,15 @@
 const express = require('express')
 const app = express()
 
+// imports pool from database.js as 'db'
+const db = require('./database')
+
+// == db can now perform queries from database.js imported connection ===
+// db.query('SELECT * FROM machines', (err, res, fields) => {
+//       if (err) throw err;
+//       console.log(res);
+//     });
+
 app.get('/', (req, res) => {
     res.send("funziona")
 })

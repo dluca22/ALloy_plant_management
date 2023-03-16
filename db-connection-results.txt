@@ -1,0 +1,65 @@
+first basic response of successful connection
+
+results: [
+  {
+    "id": 8,
+    "name": "forno",
+    "sector": 1
+  },
+  {
+    "id": 9,
+    "name": "pressa",
+    "sector": 2
+  },
+  {
+    "id": 10,
+    "name": "estrusore",
+    "sector": 3
+  }
+]fields: [
+  {
+    "catalog": "def",
+    "db": "azienda",
+    "table": "machines",
+    "orgTable": "machines",
+    "name": "id",
+    "orgName": "id",
+    "charsetNr": 63,
+    "length": 11,
+    "type": 3,
+    "flags": 16899,
+    "decimals": 0,
+    "zeroFill": false,
+    "protocol41": true
+  },
+  {
+    "catalog": "def",
+    "db": "azienda",
+    "table": "machines",
+    "orgTable": "machines",
+    "name": "name",
+    "orgName": "name",
+    "charsetNr": 33,
+    "length": 765,
+    "type": 253,
+    "flags": 4097,
+    "decimals": 0,
+    "zeroFill": false,
+    "protocol41": true
+  },
+  {
+    "catalog": "def",
+    "db": "azienda",
+    "table": "machines",
+    "orgTable": "machines",
+    "name": "sector",
+    "orgName": "sector",
+    "charsetNr": 63,
+    "length": 11,
+    "type": 3,
+    "flags": 4097,
+    "decimals": 0,
+    "zeroFill": false,
+    "protocol41": true
+  }
+]
