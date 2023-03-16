@@ -27,8 +27,14 @@ app.get('/machines', (req, res) => {
         code: 400,
         message: 'bad request, unable to query the database',
       });
+    } else if (result.length === 0) {
+      return res.json({
+        code: 204,
+        message: 'There are no entries for this endpoint',
+      });
+    } else {
+      res.json(result);
     }
-    res.json(result);
   });
 });
 
@@ -36,22 +42,21 @@ app.get('/machines', (req, res) => {
 app.get('/machines/:id', (req, res) => {
   const { id } = req.params;
   db.query(
-    `SELECT m.*, p.*  from machines m JOIN operational_parameters p ON p.machine_id = m.id WHERE m.id = ${id}`,
+    `SELECT m.*, p.* FROM machines m JOIN operational_parameters p ON p.machine_id = m.id WHERE m.id = ${id}`,
     (error, result) => {
       if (error) {
         res.json({
           code: 400,
           message: 'bad request, unable to query the database',
         });
-      }
-      if (result.length === 0) {
+      }else if (result.length === 0) {
         return res.json({
           code: 204,
           message: 'There are no entries for this endpoint',
         });
+      } else {
+        res.json(result);
       }
-
-      res.json(result);
     }
   );
 });
@@ -63,14 +68,14 @@ app.get('/downtime', (req, res) => {
         code: 400,
         message: 'bad request, unable to query the database',
       });
-    }
-    if (result.length === 0) {
+    } else if (result.length === 0) {
       return res.json({
         code: 204,
         message: 'There are no entries for this endpoint',
       });
+    } else {
+      res.json(result);
     }
-    return res.json(result);
   });
 });
 
@@ -81,14 +86,14 @@ app.get('/maintenance', (req, res) => {
         code: 400,
         message: 'bad request, unable to query the database',
       });
-    }
-    if (result.length === 0) {
+    } else if (result.length === 0) {
       return res.json({
         code: 204,
         message: 'There are no entries for this endpoint',
       });
+    } else {
+      return res.json(result);
     }
-    return res.json(result);
   });
 });
 
