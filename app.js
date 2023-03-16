@@ -22,7 +22,14 @@ app.get('/', (req, res) => {
   res.send(html);
 });
 
-// moved each route to its own file
+// backend:
+    // "/" index
+    // "/machines" & machines:id gestiscono la lista macchine completa + specifica macchina
+    //  "/downtime" è l'endopoint che manda indietro tutti i downtime registrati, + aggiungere /downtime:id, per la ricerca specifica dei downtime, oppure machines/:id/downtime
+    // "/maintenance" è lo stesso di downtime
+    // "/alerts" è lo stesso
+
+// moved each endpoint to its own file
 app.use('/machines', machineRoutes)
 app.use('/downtime', downtimeRoutes)
 app.use('/maintenance', maintenanceRoutes)
