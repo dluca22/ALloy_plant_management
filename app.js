@@ -10,9 +10,11 @@ const db = require('./database');
 app.get('/', (req, res) => {
   const html = `
     <h1>Entrypoint</h1>
-    <a href="/machines">list of machines</a>
-    <a href="/downtime">downtime page</a>
-    <a href="/maintenance">maintenance page</a>
+    <ul>
+        <li><a href="/machines">list of machines</a></li>
+        <li><a href="/downtime">downtime page</a></li>
+        <li><a href="/maintenance">maintenance page</a></li>
+    </ul>
     `;
   res.send(html);
 });
@@ -42,17 +44,60 @@ app.get('/machines/:id', (req, res) => {
           message: 'bad request, unable to query the database',
         });
       }
+      if (result.length === 0) {
+        return res.json({
+          code: 204,
+          message: 'There are no entries for this endpoint',
+        });
+      }
+
       res.json(result);
     }
   );
 });
 
 app.get('/downtime', (req, res) => {
-  res.send('GET request to the downtime pages');
+  db.query('SELECT * from downtime', (error, result) => {
+    if (error) {
+      return res.json({
+        code: 400,
+        message: 'bad request, unable to query the database',
+      });
+    }
+    if (result.length === 0) {
+      return res.json({
+        code: 204,
+        message: 'There are no entries for this endpoint',
+      });
+    }
+    return res.json(result);
+  });
 });
 
 app.get('/maintenance', (req, res) => {
-  res.send('GET request to the maintenance pages');
+  db.query('SELECT * from maintenance', (error, result) => {
+    if (error) {
+      return res.json({
+        code: 400,
+        message: 'bad request, unable to query the database',
+      });
+    }
+    if (result.length === 0) {
+      return res.json({
+        code: 204,
+        message: 'There are no entries for this endpoint',
+      });
+    }
+    return res.json(result);
+  });
+});
+
+app.all('*', (req, res) => {
+  const html = `
+    <h1>404 - Invalid path</h1>
+    <a href="/"><button>go home</button></a>
+    `;
+  res.send(html);
 });
 
 app.listen(3000, () => {
