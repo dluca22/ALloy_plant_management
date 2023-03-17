@@ -1,13 +1,20 @@
 const express = require('express');
+const cors = require('cors')
+
 const app = express();
+// include json middleware
+app.use(express.json());
+app.use(cors())
+
+const corsOptions = {
+  origin: "http://127.0.0.1:4200"
+}
 
 const machineRoutes = require('./routes/machines')
 const alertsRoutes = require('./routes/alerts')
 const downtimeRoutes = require('./routes/downtime')
 const maintenanceRoutes = require('./routes/maintenance')
 
-// include json middleware
-app.use(express.json());
 
 app.get('/', (req, res) => {
   const html = `
@@ -30,7 +37,7 @@ app.get('/', (req, res) => {
     // "/alerts" è lo stesso
 
 // moved each endpoint to its own file
-app.use('/machines', machineRoutes)
+app.use('/machines', cors(corsOptions), machineRoutes)
 app.use('/downtime', downtimeRoutes)
 app.use('/maintenance', maintenanceRoutes)
 app.use('/alerts', alertsRoutes)
