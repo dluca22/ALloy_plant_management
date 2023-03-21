@@ -41,7 +41,7 @@ router.get('/', (req, res) => {
             message: 'There are no entries for this endpoint',
           });
         } else {
-          res.json(result);
+          res.json(result[0]);
         }
       }
     );
