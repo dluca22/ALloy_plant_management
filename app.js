@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors')
-const morgan = require('morgan')
+
 
 const app = express();
 // include json middleware
@@ -8,9 +8,10 @@ app.use(express.json());
 app.use(cors())
 
 // morgan is an external middleware module to log requests status and repsonses to console, it takes various configurations
+const morgan = require('morgan')
 // app.use(morgan(':method :url :status'));
 
-// this is a custom middleware we can define to log to console the values we want
+// instead of `morgan` module this is a custom middleware we can define to log to console the values we want
 app.use((req, res, next) => {
   console.log(`Incoming ${req.method} | request to ${req.originalUrl} | status: ${res.statusCode}`);
   next();
