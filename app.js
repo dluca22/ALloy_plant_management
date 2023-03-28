@@ -1,15 +1,24 @@
 const express = require('express');
-const cors = require('cors')
-
-
 const app = express();
+
+const cors = require('cors');
+const http = require('http').createServer(app)
+
+const io = require('socket.io')(http, {
+  cors: {
+    origins: ["http://127.0.0.1:4200"]
+  }
+})
+
+const corsOptions = {
+  origin: "http://127.0.0.1:4200"
+}
 // include json middleware
 app.use(express.json());
-app.use(cors())
+app.use(cors(corsOptions))
 
-// morgan is an external middleware module to log requests status and repsonses to console, it takes various configurations
-const morgan = require('morgan')
-// app.use(morgan(':method :url :status'));
+
+
 
 // instead of `morgan` module this is a custom middleware we can define to log to console the values we want
 app.use((req, res, next) => {
@@ -18,9 +27,6 @@ app.use((req, res, next) => {
 });
 
 
-const corsOptions = {
-  origin: "http://127.0.0.1:4200"
-}
 
 const machineRoutes = require('./routes/machines')
 const alertsRoutes = require('./routes/alerts')
@@ -41,28 +47,45 @@ app.get('/', (req, res) => {
   res.send(html);
 });
 
-// backend:
-    // "/" index
-    // "/machines" & machines:id gestiscono la lista macchine completa + specifica macchina
-    //  "/downtime" è l'endopoint che manda indietro tutti i downtime registrati, + aggiungere /downtime:id, per la ricerca specifica dei downtime, oppure machines/:id/downtime
-    // "/maintenance" è lo stesso di downtime
-    // "/alerts" è lo stesso
-
 // moved each endpoint to its own file
-app.use('/machines', cors(corsOptions), machineRoutes)
+app.use('/machines', cors(), machineRoutes)
 app.use('/downtime', downtimeRoutes)
 app.use('/maintenance', maintenanceRoutes)
 app.use('/alerts', alertsRoutes)
 
+// define the connect event listener outside of any middleware
+io.on('connection', (socket) => {
+  console.log("a user connected");
+
+  // example of sending data to the client
+  socket.emit('data', { message: 'hello client' });
+
+  // example of receiving data from the client
+  socket.on('message', (data) => {
+    console.log(`received message from client: ${data}`);
+  });
+
+  socket.on("connect_error", (err) => {
+    console.log(`connect_error due to `);
+  });
+  // disconnect event listener
+  socket.on('disconnect', () => {
+    console.log('a user disconnected');
+  });
+});
+app.get('/socket.io/*', (req, res) => {
+
+  res.send('Socket server is running');
+});
 
 app.all('*', (req, res) => {
   const html = `
     <h1>404 - Invalid path</h1>
-    <a href="/"><button>go home</button></a>
+    <a href="/"><button>va a casa</button></a>
     `;
   res.send(html);
 });
 
-app.listen(3000, () => {
+http.listen(3000, () => {
   console.log('listening on http://localhost:3000');
 });
