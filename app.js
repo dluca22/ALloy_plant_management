@@ -2,37 +2,33 @@ const express = require('express');
 const app = express();
 
 const cors = require('cors');
-const http = require('http').createServer(app)
+const http = require('http').createServer(app);
 
 const io = require('socket.io')(http, {
   cors: {
-    origins: ["http://127.0.0.1:4200"]
-  }
-})
+    origins: ['http://127.0.0.1:4200'],
+  },
+});
 
 const corsOptions = {
-  origin: "http://127.0.0.1:4200"
-}
+  origin: 'http://127.0.0.1:4200',
+};
 // include json middleware
 app.use(express.json());
-app.use(cors(corsOptions))
-
-
-
+app.use(cors(corsOptions));
 
 // instead of `morgan` module this is a custom middleware we can define to log to console the values we want
 app.use((req, res, next) => {
-  console.log(`Incoming ${req.method} | request to ${req.originalUrl} | status: ${res.statusCode}`);
+  console.log(
+    `Incoming ${req.method} | request to ${req.originalUrl} | status: ${res.statusCode}`
+  );
   next();
 });
 
-
-
-const machineRoutes = require('./routes/machines')
-const alertsRoutes = require('./routes/alerts')
-const downtimeRoutes = require('./routes/downtime')
-const maintenanceRoutes = require('./routes/maintenance')
-
+const machineRoutes = require('./routes/machines');
+const alertsRoutes = require('./routes/alerts');
+const downtimeRoutes = require('./routes/downtime');
+const maintenanceRoutes = require('./routes/maintenance');
 
 app.get('/', (req, res) => {
   const html = `
@@ -48,24 +44,28 @@ app.get('/', (req, res) => {
 });
 
 // moved each endpoint to its own file
-app.use('/machines', cors(), machineRoutes)
-app.use('/downtime', downtimeRoutes)
-app.use('/maintenance', maintenanceRoutes)
-app.use('/alerts', alertsRoutes)
+app.use('/machines', cors(), machineRoutes);
+app.use('/downtime', downtimeRoutes);
+app.use('/maintenance', maintenanceRoutes);
+app.use('/alerts', alertsRoutes);
 
 // define the connect event listener outside of any middleware
 io.on('connection', (socket) => {
-  console.log("a user connected");
+  console.log('a user connected');
 
   // example of sending data to the client
-  socket.emit('data', { message: 'hello client' });
+  const interval = setInterval(() => {
+    socket.emit('data', {
+      randomNum: Math.round(Math.random() * 100)
+    });
+  }, 10);
 
   // example of receiving data from the client
   socket.on('message', (data) => {
     console.log(`received message from client: ${data}`);
   });
 
-  socket.on("connect_error", (err) => {
+  socket.on('connect_error', (err) => {
     console.log(`connect_error due to `);
   });
   // disconnect event listener
@@ -73,10 +73,7 @@ io.on('connection', (socket) => {
     console.log('a user disconnected');
   });
 });
-app.get('/socket.io/*', (req, res) => {
 
-  res.send('Socket server is running');
-});
 
 app.all('*', (req, res) => {
   const html = `
