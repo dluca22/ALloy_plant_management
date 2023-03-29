@@ -4,20 +4,20 @@ const app = express();
 const cors = require('cors');
 const http = require('http').createServer(app);
 
-const io = require('socket.io')(http, {
-  cors: {
-    origins: ['http://127.0.0.1:4200'],
-  },
-});
-
 const corsOptions = {
   origin: 'http://127.0.0.1:4200',
 };
+
+// from https://deepinder.me/creating-a-real-time-app-with-angular-8-and-socket-io-with-nodejs
+const io = require('socket.io')(http, {
+  cors: corsOptions
+});
+
 // include json middleware
 app.use(express.json());
 app.use(cors(corsOptions));
 
-// instead of `morgan` module this is a custom middleware we can define to log to console the values we want
+
 app.use((req, res, next) => {
   console.log(
     `Incoming ${req.method} | request to ${req.originalUrl} | status: ${res.statusCode}`
@@ -58,7 +58,7 @@ io.on('connection', (socket) => {
     socket.emit('data', {
       randomNum: Math.round(Math.random() * 100)
     });
-  }, 10);
+  }, 1000);
 
   // example of receiving data from the client
   socket.on('message', (data) => {
