@@ -4,11 +4,12 @@ const {corsConfig} = require('./config/corsConfiguration')
 
 
 const server = require('http').createServer(app);
-const socketConfig = require('./config/socketConfig')
-const io = socketConfig(server)
+const socketSetup = require('./config/socketConfig')
+const io = socketSetup(server)
 
 io.on('connection', (socket) =>{
   console.log("connected user")
+
 
 
   socket.on('disconnect', () => {
@@ -66,3 +67,5 @@ app.all('*', (req, res) => {
 server.listen(3000, () => {
   console.log('listening on http://localhost:3000');
 });
+
+
