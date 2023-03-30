@@ -53,12 +53,23 @@ app.use('/alerts', alertsRoutes);
 io.on('connection', (socket) => {
   console.log('a user connected');
 
-  // example of sending data to the client
+  // example of sending data to the client on 1 sec interval
+  // const interval = setInterval(() => {
+  //   // emit randonm number for temperature with machine identifier
+  //   socket.emit('temperatureUpdate',
+  //     {'forno': randomNum(),
+  //     'pressa': randomNum(),
+  //     'estrusore': randomNum()}
+  //   );
+  // }, 3000);
   const interval = setInterval(() => {
-    socket.emit('data', {
-      randomNum: Math.round(Math.random() * 100)
-    });
-  }, 1000);
+    // emit randonm number for temperature with machine identifier
+    socket.emit('temperatureUpdate',[
+      {name: 'forno', temperature: randomNum()},
+      {name: 'pressa', temperature: randomNum()},
+      {name: 'estrusore', temperature: randomNum()}
+    ]);
+  }, 3000);
 
   // example of receiving data from the client
   socket.on('message', (data) => {
@@ -70,10 +81,15 @@ io.on('connection', (socket) => {
   });
   // disconnect event listener
   socket.on('disconnect', () => {
+    // console.log("2", interval) //test to see if interval matches
+    clearInterval(interval)
     console.log('a user disconnected');
   });
 });
 
+function randomNum(){
+  return Math.round(Math.random() * 100)
+}
 
 app.all('*', (req, res) => {
   const html = `
