@@ -4,8 +4,19 @@ const {corsConfig} = require('./config/corsConfiguration')
 
 
 const server = require('http').createServer(app);
+const socketConfig = require('./config/socketConfig')
+const io = socketConfig(server)
+
+io.on('connection', (socket) =>{
+  console.log("connected user")
 
 
+  socket.on('disconnect', () => {
+
+    console.log('a user disconnected');
+  });
+
+})
 
 
 // include json middleware
@@ -55,5 +66,3 @@ app.all('*', (req, res) => {
 server.listen(3000, () => {
   console.log('listening on http://localhost:3000');
 });
-
-module.exports = server;
