@@ -1,29 +1,15 @@
 const express = require('express');
 const app = express();
-const {corsConfig} = require('./config/corsConfiguration')
-
+const { corsConfig } = require('./config/corsConfiguration');
 
 const server = require('http').createServer(app);
-const socketSetup = require('./config/socketConfig')
-const io = socketSetup(server)
-
-io.on('connection', (socket) =>{
-  console.log("connected user")
-
-
-
-  socket.on('disconnect', () => {
-
-    console.log('a user disconnected');
-  });
-
-})
-
+const testEmitter = require('./utils/testEmitter');
+const socketSetup = require('./config/socketConfig');
+const io = socketSetup(server);
 
 // include json middleware
 app.use(express.json());
 app.use(corsConfig);
-
 
 app.use((req, res, next) => {
   console.log(
@@ -56,6 +42,32 @@ app.use('/downtime', downtimeRoutes);
 app.use('/maintenance', maintenanceRoutes);
 app.use('/alerts', alertsRoutes);
 
+const randomNum = require('./utils/machineDataGenerator')
+
+
+
+// socket connection but socket config is in another file
+io.on('connection', (socket) => {
+  console.log('a user connected');
+
+  const interval = setInterval(() => {
+    testEmitter(socket);
+  },3000);
+
+  socket.on('message', (data) => {
+    console.log(`received message from client: ${data}`);
+  });
+
+  socket.on('connect_error', (err) => {
+    console.log(`connect_error due to `);
+  });
+  // disconnect event listener
+  socket.on('disconnect', () => {
+    clearInterval(interval)
+    console.log('a user disconnected');
+  });
+});
+
 app.all('*', (req, res) => {
   const html = `
     <h1>404 - Invalid path</h1>
@@ -68,4 +80,4 @@ server.listen(3000, () => {
   console.log('listening on http://localhost:3000');
 });
 
-
+module.exports = server;
