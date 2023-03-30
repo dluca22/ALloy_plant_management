@@ -14,6 +14,8 @@ const io = socketSetup(server);
 // moved cors configuration to other file to share with socketConfig
 const { corsConfig } = require('./config/corsConfiguration');
 
+
+
 // middleware configurations
 app.use(express.json()); // include json middleware for API responses
 app.use(corsConfig);
@@ -53,16 +55,29 @@ app.use('/downtime', downtimeRoutes);
 app.use('/maintenance', maintenanceRoutes);
 app.use('/alerts', alertsRoutes);
 
-const testEmitter = require('./utils/testEmitter')
+
+// fallback invalid path
+app.all('*', (req, res) => {
+  const html = `
+    <h1>404 - Invalid path</h1>
+    <a href="/"><button>va a casa</button></a>
+    `;
+  res.send(html);
+});
+
+
+// ------- web sockets code ---------
+
+// module that generates data and emits socket messages
+const machineDataGenerator = require('./utils/machineDataGenerator')
+
 // listens for socket connections
 // LATER ? move to other file?? wasn't able to
 io.on('connection', (socket) => {
   console.log('a user connected');
 
-  // // upon connection call function that generates random values after getting machine parameters
-  // const interval = setInterval(() => {
-  // },3000);
-  testEmitter(socket);
+  // upon connection call function that emits random data for each machine in database
+  machineDataGenerator(socket);
 
   socket.on('message', (data) => {
     console.log(`received message from client: ${data}`);
@@ -77,15 +92,6 @@ io.on('connection', (socket) => {
     clearInterval(interval)
     console.log('a user disconnected');
   });
-});
-
-// fallback invalid path
-app.all('*', (req, res) => {
-  const html = `
-    <h1>404 - Invalid path</h1>
-    <a href="/"><button>va a casa</button></a>
-    `;
-  res.send(html);
 });
 
 server.listen(3000, () => {
