@@ -1,16 +1,24 @@
 const express = require('express');
+// intialization of express server for configuration
 const app = express();
-const { corsConfig } = require('./config/corsConfiguration');
 
+//  creating the instance of the http server built into node passing configuration from app
+// TODO - remove?? try and just use app instead of server
 const server = require('http').createServer(app);
-const testEmitter = require('./utils/testEmitter');
+
+// import setup for web socket from separate file
+// initialize socket instance passing server for the configuration
 const socketSetup = require('./config/socketConfig');
 const io = socketSetup(server);
 
-// include json middleware
-app.use(express.json());
+// moved cors configuration to other file to share with socketConfig
+const { corsConfig } = require('./config/corsConfiguration');
+
+// middleware configurations
+app.use(express.json()); // include json middleware for API responses
 app.use(corsConfig);
 
+// middleware for logging every incoming request
 app.use((req, res, next) => {
   console.log(
     `Incoming ${req.method} | request to ${req.originalUrl} | status: ${res.statusCode}`
@@ -18,11 +26,15 @@ app.use((req, res, next) => {
   next();
 });
 
+// external module to handle socket message emission
+const testEmitter = require('./utils/testEmitter');
+// importing routes
 const machineRoutes = require('./routes/machines');
 const alertsRoutes = require('./routes/alerts');
 const downtimeRoutes = require('./routes/downtime');
 const maintenanceRoutes = require('./routes/maintenance');
 
+// index entrypoint with raw html
 app.get('/', (req, res) => {
   const html = `
     <h1>Entrypoint</h1>
@@ -42,14 +54,13 @@ app.use('/downtime', downtimeRoutes);
 app.use('/maintenance', maintenanceRoutes);
 app.use('/alerts', alertsRoutes);
 
-const randomNum = require('./utils/machineDataGenerator')
 
-
-
-// socket connection but socket config is in another file
+// listens for socket connections
+// LATER ? move to other file?? wasn't able to
 io.on('connection', (socket) => {
   console.log('a user connected');
 
+  // upon connection call function that generates random values after getting machine parameters
   const interval = setInterval(() => {
     testEmitter(socket);
   },3000);
@@ -59,15 +70,17 @@ io.on('connection', (socket) => {
   });
 
   socket.on('connect_error', (err) => {
-    console.log(`connect_error due to `);
+    console.log(`connect_error due to ${err}`);
   });
-  // disconnect event listener
+
+  // disconnect event listener clears interval
   socket.on('disconnect', () => {
     clearInterval(interval)
     console.log('a user disconnected');
   });
 });
 
+// fallback invalid path
 app.all('*', (req, res) => {
   const html = `
     <h1>404 - Invalid path</h1>
@@ -79,5 +92,3 @@ app.all('*', (req, res) => {
 server.listen(3000, () => {
   console.log('listening on http://localhost:3000');
 });
-
-module.exports = server;
