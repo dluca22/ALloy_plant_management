@@ -26,8 +26,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// external module to handle socket message emission
-const testEmitter = require('./utils/testEmitter');
+
 // importing routes
 const machineRoutes = require('./routes/machines');
 const alertsRoutes = require('./routes/alerts');
@@ -54,16 +53,16 @@ app.use('/downtime', downtimeRoutes);
 app.use('/maintenance', maintenanceRoutes);
 app.use('/alerts', alertsRoutes);
 
-
+const testEmitter = require('./utils/testEmitter')
 // listens for socket connections
 // LATER ? move to other file?? wasn't able to
 io.on('connection', (socket) => {
   console.log('a user connected');
 
-  // upon connection call function that generates random values after getting machine parameters
-  const interval = setInterval(() => {
-    testEmitter(socket);
-  },3000);
+  // // upon connection call function that generates random values after getting machine parameters
+  // const interval = setInterval(() => {
+  // },3000);
+  testEmitter(socket);
 
   socket.on('message', (data) => {
     console.log(`received message from client: ${data}`);

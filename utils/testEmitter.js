@@ -2,12 +2,14 @@ const randomNum = require('./machineDataGenerator')
 
 function testEmitter(socket){
 console.log("chiamata")
-
-return socket.emit('temperatureUpdate',[
-{name: 'forno', temperature: randomNum()},
-{name: 'pressa', temperature: randomNum()},
-{name: 'estrusore', temperature: randomNum()},
-]);
+// upon connection call function that generates random values after getting machine parameters
+  const interval = setInterval(() => {
+      socket.emit('temperatureUpdate',[
+          {name: 'forno', temperature: randomNum()},
+          {name: 'pressa', temperature: randomNum()},
+          {name: 'estrusore', temperature: randomNum()},
+        ]);
+    },3000);
 
 }
 
