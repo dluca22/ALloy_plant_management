@@ -88,10 +88,7 @@ io.on('connection', (socket) => {
   });
 
   // disconnect event listener clears interval
-  socket.on('disconnect', () => {
-    clearInterval(interval)
-    console.log('a user disconnected');
-  });
+  
 });
 
 server.listen(3000, () => {

@@ -39,41 +39,51 @@ async function machineDataGenerator(socket) {
 
     if(!machinesData){
         machinesData = await getMachineData()
+        console.log("ricerca db")
     }
 
-    console.log("quiiii", machinesData[0])
+    // console.log("quiiii", machinesData)
 
+
+    // for each machine received from database, on a 3 sec interval, emit a socket message named after the machine with updated data from
+    const interval = setInterval(() => {
     machinesData.forEach(machine => {
-
-
 // TODO continuare qua a creare un emit per ogni macchina, ma controllare se ha senso
-
-        socket.emit(machinesData.name, {
-            id: machine.id,
-            name: machine.name,
-            min_pressure :
-            max_pressure :
-            min_temperature :
-            min_temperature :
-            min_pressure :
+        socket.emit(machine.name, {
+            pressure : generateRandomData(machine.min_pressure, machine.max_pressure),
+            temperature : generateRandomData(machine.min_temp, machine.max_temp),
+            flow_rate : generateRandomFlowRate(machine.flow_rate),
         })
-    })
-
-
-  console.log('chiamata');
-  // upon connection call function that generates random values after getting machine parameters
-  const interval = setInterval(() => {
-    socket.emit('temperatureUpdate', [
-      { name: 'forno', temperature: randomNum() },
-      { name: 'pressa', temperature: randomNum() },
-      { name: 'estrusore', temperature: randomNum() },
-    ]);
+      })
+      console.log("emit")
   }, 3000);
+  socket.on('disconnect', () => {
+    clearInterval(interval)
+    console.log('a user disconnected');
+  });
+  console.log('chiamata');
+  // // upon connection call function that generates random values after getting machine parameters
+  //   socket.emit('temperatureUpdate', [
+  //     { name: 'forno', temperature: randomNum() },
+  //     { name: 'pressa', temperature: randomNum() },
+  //     { name: 'estrusore', temperature: randomNum() },
+  //   ]);
 }
 
 module.exports = machineDataGenerator;
 
-// temp randomNum function
-function randomNum() {
-  return Math.round(Math.random() * 100);
+// generate random number between an interval of max & min inclusive with 1 decimal
+// TODO aggiungere casualità di numeri al di fuori del bracket minimo-massimo, esempio 2% di casistica che siano valori maggiori o minori del minimo o massimo (tipo moltiplicatore differenziale)
+function generateRandomData(min, max) {
+
+  const result = Math.random() * (max - min) + min;
+  return Number(result.toFixed(1))
+}
+
+// Generates a random number within a range of +/- 3 from the input value with 3 decimal
+// TODO change fixed number to fixed percent from base number (means nothing adding +/-3 if one machine's value is 500 and another is 1 )
+function generateRandomFlowRate(val){
+  const delta = Math.random() *(3 - (-3)) + (-3)
+  const result = val + delta
+	return Number((result).toFixed((3)))
 }
