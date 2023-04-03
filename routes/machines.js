@@ -50,12 +50,12 @@ router.get('/', (req, res) => {
         if (error) {
           res.json({
             code: 400,
-            message: 'bad request, unable to query the database',
+            message: 'Errore nella comunicazione al databse',
           });
         }else if (result.length === 0) {
           return res.json({
             code: 204,
-            message: 'There are no entries for this endpoint',
+            message: 'Non ci sono risultati nel database',
           });
         } else {
           res.json(result[0]);
@@ -64,12 +64,21 @@ router.get('/', (req, res) => {
     );
   });
 
+  // patch request, get id and body to update the machine.online column
+
   router.patch('/:id', (req, res) =>{
     const { id } = req.params
-    const body = req.body
+    const body = req.body // {online: true/false}
 
-    res
-    // db.query(`UPDATE machines m SET m.online =  FROM machines m WHERE m.id = ${id}`)
+
+    try{
+      db.query(`UPDATE machines m SET m.online = ${body.online} WHERE m.id = ${id}`)
+    }
+    catch{ // serve ??
+      console.log("errore try/catch");
+      return res.json({code:500, message: "Errore nell'update database [backend]"})
+    }
+    return res.json({code:200, message: "Richiesta eseguita."})
   })
 
 

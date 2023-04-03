@@ -61,7 +61,6 @@ async function machineDataGenerator(socket) {
       }
     });
 
-    console.log('emit');
   }, 3000);
 
   // clear interval when user disconnects from socket
