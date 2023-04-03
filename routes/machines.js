@@ -24,6 +24,23 @@ router.get('/', (req, res) => {
     });
   });
 
+
+// ==================== esempio in stile MVC a cui migrare =================================
+// router.route('/:id')
+//   .get((req,res) => {
+//     // ........
+//   })
+//   .post((req, res) => {
+//     // ........
+//   })
+//   .put((req, res) => {
+//     // ........
+//   })
+// ===================================================================================
+
+
+
+
   // endpoint for a specific machine, where data from the tables `machines` and its `operational_parameters` are joined and returned to the frontend
   router.get('/:id', (req, res) => {
     const { id } = req.params;
@@ -46,5 +63,15 @@ router.get('/', (req, res) => {
       }
     );
   });
+
+  router.patch('/:id', (req, res) =>{
+    const { id } = req.params
+    const body = req.body
+
+    res
+    // db.query(`UPDATE machines m SET m.online =  FROM machines m WHERE m.id = ${id}`)
+  })
+
+
 
   module.exports = router;

@@ -17,6 +17,7 @@
 const db = require('../database');
 
 // async gets operational_params from database and returns a promise
+// promise will return array of objects with the values that are needed for the random data generator functions
 function getMachineData() {
   return new Promise((resolve, reject) => {
     db.query(
@@ -33,47 +34,45 @@ function getMachineData() {
   });
 }
 
+// structure to generate random data for each machine returned from the database
 async function machineDataGenerator(socket) {
+  // initialize empty list of machine
   let machinesData;
 
+  // if list is empty, quert database for all machines and set them to the var
   if (!machinesData) {
     machinesData = await getMachineData();
     console.log('ricerca db');
   }
 
-  // console.log("quiiii", machinesData)
+  // else, if machines[] is already loaded to "state" go on with logic
 
   // for each machine received from database, on a 3 sec interval, emit a socket message named after the machine with updated data from
   const interval = setInterval(() => {
     machinesData.forEach((machine) => {
 
+      // only emit data from machines that are flagged as "online"
       if (machine.online) {
         socket.emit(machine.name, {
-          pressure: generateRandomData(
-            machine.min_pressure,
-            machine.max_pressure
-          ),
+          pressure: generateRandomData( machine.min_pressure, machine.max_pressure),
           temperature: generateRandomData(machine.min_temp, machine.max_temp),
           flow_rate: generateRandomFlowRate(machine.flow_rate),
         });
       }
     });
+
     console.log('emit');
   }, 3000);
+
+  // clear interval when user disconnects from socket
   socket.on('disconnect', () => {
     clearInterval(interval);
     console.log('a user disconnected');
   });
-  console.log('chiamata');
-  // // upon connection call function that generates random values after getting machine parameters
-  //   socket.emit('temperatureUpdate', [
-  //     { name: 'forno', temperature: randomNum() },
-  //     { name: 'pressa', temperature: randomNum() },
-  //     { name: 'estrusore', temperature: randomNum() },
-  //   ]);
+
+  console.log('utente connesso al socket, chiamato machineDataGenerator');
 }
 
-module.exports = machineDataGenerator;
 
 // generate random number between an interval of max & min inclusive with 1 decimal
 // TODO aggiungere casualità di numeri al di fuori del bracket minimo-massimo, esempio 2% di casistica che siano valori maggiori o minori del minimo o massimo (tipo moltiplicatore differenziale)
@@ -89,3 +88,6 @@ function generateRandomFlowRate(val) {
   const result = val + delta;
   return Number(result.toFixed(3));
 }
+
+// exports the function that handles socket.emit that is called upon socket.connect
+module.exports = machineDataGenerator;

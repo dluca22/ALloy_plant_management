@@ -76,19 +76,19 @@ const machineDataGenerator = require('./utils/machineDataGenerator')
 io.on('connection', (socket) => {
   console.log('a user connected');
 
-  // upon connection call function that emits random data for each machine in database
-  machineDataGenerator(socket);
-
+// test
   socket.on('message', (data) => {
     console.log(`received message from client: ${data}`);
   });
 
+  // handle errors
   socket.on('connect_error', (err) => {
     console.log(`connect_error due to ${err}`);
   });
 
-  // disconnect event listener clears interval
-  
+  // upon connection, if no error, call function that emits random data for each machine in database
+  machineDataGenerator(socket);
+
 });
 
 server.listen(3000, () => {
