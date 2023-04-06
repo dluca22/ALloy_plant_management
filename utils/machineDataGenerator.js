@@ -16,12 +16,16 @@
 // import database
 const db = require('../database');
 
-// async gets operational_params from database and returns a promise
-// promise will return array of objects with the values that are needed for the random data generator functions
+// async gets list of machines + their operational_params from database IF machine is "online" returning a promise
+// promise will return array of machine objects with the values that are needed for the random data generator functions
+// it will get called again from the frontend to force update the list of machines that are online/offline
 function getMachineData() {
   return new Promise((resolve, reject) => {
     db.query(
-      'SELECT m.id, m.name, m.online, p.min_temp, p.max_temp, p.flow_rate, p.min_pressure, p.max_pressure  FROM machines m JOIN operational_parameters p ON p.machine_id = m.id',
+      `SELECT m.id, m.name, p.min_temp, p.max_temp, p.flow_rate, p.min_pressure, p.max_pressure
+        FROM machines m JOIN operational_parameters p
+        ON p.machine_id = m.id
+        WHERE m.online = true`,
       (error, result) => {
         if (error) {
           console.log('errore in query machinesDataGenerator');
@@ -34,34 +38,30 @@ function getMachineData() {
   });
 }
 
-// structure to generate random data for each machine returned from the database
+// function to emit data on socket connection based on machine parameters from database
 async function machineDataGenerator(socket) {
-  // initialize empty list of machine
-  let machinesData;
+  // when new connection, fetch data from DB, storing data to variable is useless
+  let machinesData = await getMachineData();
 
-  // if list is empty, quert database for all machines and set them to the var
-  if (!machinesData) {
-    machinesData = await getMachineData();
-    console.log('ricerca db');
-  }
-
-  // else, if machines[] is already loaded to "state" go on with logic
-
-  // for each machine received from database, on a 3 sec interval, emit a socket message named after the machine with updated data from
+  // for each machine received from database, on a 2 sec interval, emit a socket message named after the machine with updated data from
   const interval = setInterval(() => {
     machinesData.forEach((machine) => {
-
-      // only emit data from machines that are flagged as "online"
-      if (machine.online) {
-        socket.emit(machine.name, {
-          pressure: generateRandomData( machine.min_pressure, machine.max_pressure),
+      socket.emit(machine.name, {
+          pressure: generateRandomData(
+            machine.min_pressure,
+            machine.max_pressure),
           temperature: generateRandomData(machine.min_temp, machine.max_temp),
           flow_rate: generateRandomFlowRate(machine.flow_rate),
         });
-      }
     });
+  }, 2000);
 
-  }, 3000);
+
+  // when successful patch request, frontend will send "patchStatus" message to trigger a refresh of machines.online that emit data
+  // TODO non è il metodo ideale, ma non mi viene in mente come forzare questo comportamento dalla .patch() request.
+  socket.on('patchStatus', async () => {
+    machinesData = await getMachineData();
+  });
 
   // clear interval when user disconnects from socket
   socket.on('disconnect', () => {
@@ -69,9 +69,8 @@ async function machineDataGenerator(socket) {
     console.log('a user disconnected');
   });
 
-  console.log('utente connesso al socket, chiamato machineDataGenerator');
+  console.log('utente connesso al socket');
 }
-
 
 // generate random number between an interval of max & min inclusive with 1 decimal
 // TODO aggiungere casualità di numeri al di fuori del bracket minimo-massimo, esempio 2% di casistica che siano valori maggiori o minori del minimo o massimo (tipo moltiplicatore differenziale)
