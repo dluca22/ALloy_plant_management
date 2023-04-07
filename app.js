@@ -73,6 +73,8 @@ const machineDataGenerator = require('./utils/machineDataGenerator')
 
 // listens for socket connections
 // LATER ? move to other file?? wasn't able to
+// BUG - questo modo di chiamare la funzione machineDataGenerator() su ogni socket connection, fa in modo che una funzione diversa venga chiamata, quindi se piu client si connettono al backned, ogninuo ha uno steam diverso di dati generati casualmente
+// si, è un test, ma sarebbe piu logico che lo stream di dati sia lo stesso tra tutti quanti e vengano solo comunicati quando qualcuno si connette, avendo lo stesso risultato per tutti
 io.on('connection', (socket) => {
   console.log('a user connected');
 
